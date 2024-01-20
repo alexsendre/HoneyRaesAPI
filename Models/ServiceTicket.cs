@@ -6,6 +6,6 @@ public class ServiceTickets
     public int CustomerID { get; set; }
     public int EmployeeID { get; set; }
     public string Description { get; set; }
-    public string isEmergency { get; set; }
+    public bool isEmergency { get; set; }
     public DateTime DateCompleted { get; set; }
 }

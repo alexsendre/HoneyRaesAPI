@@ -1,3 +1,90 @@
+using HoneyRaesAPI.Models;
+
+List<Customer> customers = new()
+{
+    new Customer()
+    {
+        Id = 1,
+        Name = "Jelly Jello",
+        Address = "35 Jella Rd."
+    },
+    new Customer()
+    {
+        Id = 2,
+        Name = "Pnut Butter",
+        Address = "44 Peanut Dr."
+    },
+    new Customer()
+    {
+        Id = 3,
+        Name = "Burnt Toast",
+        Address = "892 Toaster Cir."
+    }
+};
+
+List<Employee> employees = new()
+{
+    new Employee()
+    {
+        Id = 1,
+        Name = "Ham Sam",
+        Specialty = "Eating"
+    },
+    new Employee()
+    {
+        Id = 2,
+        Name = "Dee Bogger",
+        Specialty = "Debugging"
+    }
+};
+
+List<ServiceTickets> serviceTickets = new()
+{
+    new ServiceTickets()
+    {
+        Id = 1,
+        CustomerID = 1,
+        EmployeeID = 1,
+        Description = "Lost wallet walking back from the gym",
+        isEmergency = true,
+        DateCompleted = new DateTime(2024, 1, 3)
+    },
+    new ServiceTickets()
+    {
+        Id = 2,
+        CustomerID = 2,
+        EmployeeID = 2,
+        Description = "Couldn't find a place to sit in the break room",
+        isEmergency = false,
+        DateCompleted = new DateTime(2024, 1, 20)
+    },
+    new ServiceTickets()
+    {
+        Id = 3, 
+        CustomerID = 3,
+        EmployeeID = 1,
+        Description = "Stepped on and broke glasses",
+        isEmergency = true,
+    },
+    new ServiceTickets()
+    {
+        Id = 4,
+        CustomerID = 1,
+        EmployeeID = 2,
+        Description = "Got hacked",
+        isEmergency = true,
+        DateCompleted = new DateTime(2024, 1, 5)
+    },
+    new ServiceTickets()
+    {
+        Id = 5,
+        CustomerID = 3,
+        Description = "Couldn't get the car to start",
+        isEmergency = false,
+        DateCompleted = new DateTime(2023, 12, 26)
+    }
+};
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -21,29 +108,14 @@ var summaries = new[]
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
 
-app.MapGet("/weatherforecast", () =>
+app.MapGet("/servicetickets", () =>
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+    return serviceTickets;
+});
 
-app.MapGet("/hello", () =>
+app.MapGet("/servicetickets/{id}", (int id) =>
 {
-    return "hello";
+    return serviceTickets.FirstOrDefault(st => st.Id == id);
 });
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
