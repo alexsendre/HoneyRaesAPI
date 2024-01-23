@@ -155,4 +155,17 @@ app.MapGet("/customers/{id}", (int id) =>
     return Results.Ok(customer);
 });
 
+app.MapPost("/servicetickets", (ServiceTickets serviceTicket) =>
+{
+    serviceTicket.Id = serviceTickets.Max(st => st.Id) + 1;
+    serviceTickets.Add(serviceTicket);
+    return serviceTicket;
+});
+
+app.MapDelete("/servicetickets/{id}", (int id) =>
+{
+    ServiceTickets serviceTicket = serviceTickets.FirstOrDefault(st => st.Id == id);
+    serviceTickets.RemoveAt(serviceTicket.Id - 1);
+});
+
 app.Run();
