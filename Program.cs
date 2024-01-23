@@ -82,6 +82,13 @@ List<ServiceTickets> serviceTickets = new()
         Description = "Couldn't get the car to start",
         isEmergency = false,
         DateCompleted = new DateTime(2023, 12, 26)
+    },
+    new ServiceTickets()
+    {
+        Id = 6,
+        CustomerID = 3,
+        Description = "Couldn't get the car to start",
+        isEmergency = false
     }
 };
 
@@ -166,6 +173,29 @@ app.MapDelete("/servicetickets/{id}", (int id) =>
 {
     ServiceTickets serviceTicket = serviceTickets.FirstOrDefault(st => st.Id == id);
     serviceTickets.RemoveAt(serviceTicket.Id - 1);
+});
+
+app.MapPut("/servicetickets/{ticketId}", (int ticketId, ServiceTickets serviceTicket) =>
+{
+    ServiceTickets ticketToUpdate = serviceTickets.FirstOrDefault(st => st.Id == ticketId);
+    int ticketIndex = serviceTickets.IndexOf(ticketToUpdate);
+    if (ticketToUpdate == null)
+    {
+        return Results.NotFound();
+    }
+
+    if (ticketId != serviceTicket.Id)
+    {
+        Results.BadRequest();
+    }
+    serviceTickets[ticketIndex] = serviceTicket;
+    return Results.Ok();
+});
+
+app.MapPost("/servicetickets/{id}/complete", (int id) => 
+{
+    ServiceTickets ticketToComplete = serviceTickets.FirstOrDefault(st => st.Id == id);
+    ticketToComplete.DateCompleted = DateTime.Today;
 });
 
 app.Run();
