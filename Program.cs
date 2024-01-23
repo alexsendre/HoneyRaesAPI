@@ -120,6 +120,7 @@ app.MapGet("/servicetickets/{id}", (int id) =>
     {
         return Results.NotFound();
     }
+    serviceTicket.Employee = employees.FirstOrDefault(e => e.Id == serviceTicket.EmployeeID);
     return Results.Ok(serviceTicket);
 });
 
@@ -135,6 +136,7 @@ app.MapGet("/employees/{id}", (int id) =>
     {
         return Results.NotFound();
     }
+    employee.ServiceTickets = serviceTickets.Where(st => st.EmployeeID == id).ToList();
     return Results.Ok(employee);
 });
 
