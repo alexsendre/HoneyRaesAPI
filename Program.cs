@@ -118,4 +118,24 @@ app.MapGet("/servicetickets/{id}", (int id) =>
     return serviceTickets.FirstOrDefault(st => st.Id == id);
 });
 
+app.MapGet("/employees", () =>
+{
+    return employees;
+});
+
+app.MapGet("/employees/{id}", (int id) =>
+{
+    return employees.FirstOrDefault(em => em.Id == id);
+});
+
+app.MapGet("/customers", () =>
+{
+    return customers;
+});
+
+app.MapGet("/customers/{id}", (int id) =>
+{
+    return customers.FirstOrDefault(c => c.Id == id);
+});
+
 app.Run();
