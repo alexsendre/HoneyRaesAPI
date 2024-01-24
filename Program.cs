@@ -110,11 +110,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
 app.MapGet("/servicetickets", () =>
 {
     return serviceTickets;
@@ -196,6 +191,11 @@ app.MapPost("/servicetickets/{id}/complete", (int id) =>
 {
     ServiceTickets ticketToComplete = serviceTickets.FirstOrDefault(st => st.Id == id);
     ticketToComplete.DateCompleted = DateTime.Today;
+});
+
+app.MapGet("/servicetickets/emergency", () =>
+{
+    return serviceTickets.Where(st => st.isEmergency && st.DateCompleted == null).ToList();
 });
 
 app.Run();
