@@ -104,6 +104,33 @@ List<ServiceTickets> serviceTickets = new()
         Description = "test for incomplete & emergency & unassigned",
         isEmergency = true
     },
+    new ServiceTickets()
+    {
+        Id = 9,
+        CustomerID = 2,
+        EmployeeID = 1,
+        Description = "test for inactive",
+        isEmergency = true,
+        DateCompleted = new DateTime(2023, 1, 22)
+    },
+    new ServiceTickets()
+    {
+        Id = 10,
+        CustomerID = 1,
+        EmployeeID = 3,
+        Description = "test for inactive",
+        isEmergency = true,
+        DateCompleted = new DateTime(2023, 1, 17)
+    },
+    new ServiceTickets()
+    {
+        Id = 11,
+        CustomerID = 3,
+        EmployeeID = 1,
+        Description = "test for inactive",
+        isEmergency = true,
+        DateCompleted = new DateTime(2022, 12, 26)
+    },
 };
 
 var builder = WebApplication.CreateBuilder(args);
@@ -215,6 +242,12 @@ app.MapGet("/servicetickets/emergency", () =>
 app.MapGet("/servicetickets/unassigned", () =>
 {
     return serviceTickets.Where(st => st.EmployeeID == null).ToList();
+});
+
+app.MapGet("/servicetickets/inactive", () =>
+{
+    List<ServiceTickets> serviceTicket = serviceTickets.Where(st => st.DateCompleted <= DateTime.Today.AddYears(-1)).ToList();
+    return serviceTicket;
 });
 
 app.Run();
