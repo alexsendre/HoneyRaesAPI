@@ -87,9 +87,23 @@ List<ServiceTickets> serviceTickets = new()
     {
         Id = 6,
         CustomerID = 3,
-        Description = "Couldn't get the car to start",
-        isEmergency = false
-    }
+        Description = "test for incomplete, emergency & unassigned",
+        isEmergency = true
+    },
+    new ServiceTickets()
+    {
+        Id = 7,
+        CustomerID = 3,
+        Description = "test for unassigned",
+        isEmergency = true
+    },
+    new ServiceTickets()
+    {
+        Id = 8,
+        CustomerID = 2,
+        Description = "test for incomplete & emergency & unassigned",
+        isEmergency = true
+    },
 };
 
 var builder = WebApplication.CreateBuilder(args);
@@ -196,6 +210,11 @@ app.MapPost("/servicetickets/{id}/complete", (int id) =>
 app.MapGet("/servicetickets/emergency", () =>
 {
     return serviceTickets.Where(st => st.isEmergency && st.DateCompleted == null).ToList();
+});
+
+app.MapGet("/servicetickets/unassigned", () =>
+{
+    return serviceTickets.Where(st => st.EmployeeID == null).ToList();
 });
 
 app.Run();
