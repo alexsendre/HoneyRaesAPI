@@ -250,4 +250,10 @@ app.MapGet("/servicetickets/inactive", () =>
     return serviceTicket;
 });
 
+app.MapGet("/employees/available", () => {
+    List<Employee> employee = employees
+        .Where(e => e.ServiceTickets == null || e.ServiceTickets.Count < 1).ToList();
+    return employee;
+});
+
 app.Run();
