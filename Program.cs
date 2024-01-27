@@ -87,9 +87,50 @@ List<ServiceTickets> serviceTickets = new()
     {
         Id = 6,
         CustomerID = 3,
-        Description = "Couldn't get the car to start",
-        isEmergency = false
-    }
+        Description = "test for incomplete, emergency & unassigned",
+        isEmergency = true
+    },
+    new ServiceTickets()
+    {
+        Id = 7,
+        CustomerID = 3,
+        Description = "test for unassigned",
+        isEmergency = true
+    },
+    new ServiceTickets()
+    {
+        Id = 8,
+        CustomerID = 2,
+        Description = "test for incomplete & emergency & unassigned",
+        isEmergency = true
+    },
+    new ServiceTickets()
+    {
+        Id = 9,
+        CustomerID = 2,
+        EmployeeID = 1,
+        Description = "test for inactive",
+        isEmergency = true,
+        DateCompleted = new DateTime(2023, 1, 22)
+    },
+    new ServiceTickets()
+    {
+        Id = 10,
+        CustomerID = 1,
+        EmployeeID = 3,
+        Description = "test for inactive",
+        isEmergency = true,
+        DateCompleted = new DateTime(2023, 1, 17)
+    },
+    new ServiceTickets()
+    {
+        Id = 11,
+        CustomerID = 3,
+        EmployeeID = 1,
+        Description = "test for inactive",
+        isEmergency = true,
+        DateCompleted = new DateTime(2022, 12, 26)
+    },
 };
 
 var builder = WebApplication.CreateBuilder(args);
@@ -109,11 +150,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
 
 app.MapGet("/servicetickets", () =>
 {
@@ -162,20 +198,20 @@ app.MapGet("/customers/{id}", (int id) =>
     return Results.Ok(customer);
 });
 
-app.MapPost("/servicetickets", (ServiceTickets serviceTicket) =>
+app.MapPost("/tickets", (ServiceTickets serviceTicket) =>
 {
     serviceTicket.Id = serviceTickets.Max(st => st.Id) + 1;
     serviceTickets.Add(serviceTicket);
     return serviceTicket;
 });
 
-app.MapDelete("/servicetickets/{id}", (int id) =>
+app.MapDelete("/tickets/{id}", (int id) =>
 {
     ServiceTickets serviceTicket = serviceTickets.FirstOrDefault(st => st.Id == id);
     serviceTickets.RemoveAt(serviceTicket.Id - 1);
 });
 
-app.MapPut("/servicetickets/{ticketId}", (int ticketId, ServiceTickets serviceTicket) =>
+app.MapPut("/tickets/{ticketId}", (int ticketId, ServiceTickets serviceTicket) =>
 {
     ServiceTickets ticketToUpdate = serviceTickets.FirstOrDefault(st => st.Id == ticketId);
     int ticketIndex = serviceTickets.IndexOf(ticketToUpdate);
@@ -192,10 +228,74 @@ app.MapPut("/servicetickets/{ticketId}", (int ticketId, ServiceTickets serviceTi
     return Results.Ok();
 });
 
-app.MapPost("/servicetickets/{id}/complete", (int id) => 
+app.MapPost("/tickets/{id}/complete", (int id) => 
 {
     ServiceTickets ticketToComplete = serviceTickets.FirstOrDefault(st => st.Id == id);
     ticketToComplete.DateCompleted = DateTime.Today;
+});
+
+app.MapGet("/tickets/emergency", () =>
+{
+    return serviceTickets.Where(st => st.isEmergency && st.DateCompleted == null).ToList();
+});
+
+app.MapGet("/tickets/unassigned", () =>
+{
+    return serviceTickets.Where(st => st.EmployeeID == null).ToList();
+});
+
+app.MapGet("/customers/inactive", () =>
+{
+    List<Customer> inactiveCustomer = new();
+    List<ServiceTickets> serviceTicket = serviceTickets.Where(st => st.DateCompleted != null && st.DateCompleted <= DateTime.Today.AddYears(-1)).ToList();
+
+    foreach(var t in serviceTicket)
+    {
+        var customer = customers.Where(c => c.Id == t.Id).FirstOrDefault();
+
+        inactiveCustomer.Add(customer);
+    }
+
+    return Results.Ok(inactiveCustomer);
+});
+
+app.MapGet("/employees/available", () => {
+    List<Employee> employee = employees.Where(e => e.ServiceTickets == null || e.ServiceTickets.Count < 1).ToList();
+    return Results.Ok(employee);
+});
+
+app.MapGet("/employees/{id}/customers", (int id) =>
+{
+    var employeeCustomers = serviceTickets.Where(st => st.Id == id).Select(st => customers.FirstOrDefault(c => c.Id == st.CustomerID))
+    .Where(c => c != null)  // filter out any null customers (where no matching customer was found)
+    .ToList();
+    return Results.Ok(employeeCustomers);
+});
+
+app.MapGet("/awards/monthly", () =>
+{
+    var lastMonth = DateTime.Now.AddMonths(-1);
+    var employeeOfTheMonth = employees.OrderByDescending(e => serviceTickets.Count(st => st.EmployeeID == e.Id && st.DateCompleted >= lastMonth)).FirstOrDefault();
+
+    return Results.Ok(employeeOfTheMonth);
+});
+
+app.MapGet("/tickets/completed", () =>
+{
+    List<ServiceTickets> sortedTickets = serviceTickets.Where(st => st.DateCompleted.HasValue).OrderBy(t => t.DateCompleted).ToList();
+
+    return Results.Ok(sortedTickets);
+});
+
+app.MapGet("/tickets/priority", () =>
+{
+    List<ServiceTickets> priorityTickets = serviceTickets
+    .Where(st => st.DateCompleted == null)
+    .OrderByDescending(t => t.isEmergency)
+    .ThenBy(t => t.EmployeeID.HasValue)
+    .ToList();
+
+    return Results.Ok(priorityTickets);
 });
 
 app.Run();
