@@ -280,4 +280,11 @@ app.MapGet("/awards/monthly", () =>
     return Results.Ok(employeeOfTheMonth);
 });
 
+app.MapGet("/tickets/completed", () =>
+{
+    List<ServiceTickets> sortedTickets = serviceTickets.Where(st => st.DateCompleted.HasValue).OrderBy(t => t.DateCompleted).ToList();
+
+    return Results.Ok(sortedTickets);
+});
+
 app.Run();
