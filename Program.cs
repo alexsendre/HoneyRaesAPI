@@ -287,4 +287,15 @@ app.MapGet("/tickets/completed", () =>
     return Results.Ok(sortedTickets);
 });
 
+app.MapGet("/tickets/priority", () =>
+{
+    List<ServiceTickets> priorityTickets = serviceTickets
+    .Where(st => st.DateCompleted == null)
+    .OrderByDescending(t => t.isEmergency)
+    .ThenBy(t => t.EmployeeID.HasValue)
+    .ToList();
+
+    return Results.Ok(priorityTickets);
+});
+
 app.Run();
