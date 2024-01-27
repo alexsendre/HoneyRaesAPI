@@ -244,10 +244,19 @@ app.MapGet("/servicetickets/unassigned", () =>
     return serviceTickets.Where(st => st.EmployeeID == null).ToList();
 });
 
-app.MapGet("/servicetickets/inactive", () =>
+app.MapGet("/customers/inactive", () =>
 {
-    List<ServiceTickets> serviceTicket = serviceTickets.Where(st => st.DateCompleted <= DateTime.Today.AddYears(-1)).ToList();
-    return Results.Ok(serviceTicket);
+    List<Customer> inactiveCustomer = new();
+    List<ServiceTickets> serviceTicket = serviceTickets.Where(st => st.DateCompleted != null && st.DateCompleted <= DateTime.Today.AddYears(-1)).ToList();
+
+    foreach(var t in serviceTicket)
+    {
+        var customer = customers.Where(c => c.Id == t.Id).FirstOrDefault();
+
+        inactiveCustomer.Add(customer);
+    }
+
+    return Results.Ok(inactiveCustomer);
 });
 
 app.MapGet("/employees/available", () => {
@@ -261,6 +270,14 @@ app.MapGet("/employees/{id}/customers", (int id) =>
     .Where(c => c != null)  // filter out any null customers (where no matching customer was found)
     .ToList();
     return Results.Ok(employeeCustomers);
+});
+
+app.MapGet("/awards/monthly", () =>
+{
+    var lastMonth = DateTime.Now.AddMonths(-1);
+    var employeeOfTheMonth = employees.OrderByDescending(e => serviceTickets.Count(st => st.EmployeeID == e.Id && st.DateCompleted >= lastMonth)).FirstOrDefault();
+
+    return Results.Ok(employeeOfTheMonth);
 });
 
 app.Run();
