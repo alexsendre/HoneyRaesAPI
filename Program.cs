@@ -247,13 +247,20 @@ app.MapGet("/servicetickets/unassigned", () =>
 app.MapGet("/servicetickets/inactive", () =>
 {
     List<ServiceTickets> serviceTicket = serviceTickets.Where(st => st.DateCompleted <= DateTime.Today.AddYears(-1)).ToList();
-    return serviceTicket;
+    return Results.Ok(serviceTicket);
 });
 
 app.MapGet("/employees/available", () => {
-    List<Employee> employee = employees
-        .Where(e => e.ServiceTickets == null || e.ServiceTickets.Count < 1).ToList();
-    return employee;
+    List<Employee> employee = employees.Where(e => e.ServiceTickets == null || e.ServiceTickets.Count < 1).ToList();
+    return Results.Ok(employee);
+});
+
+app.MapGet("/employees/{id}/customers", (int id) =>
+{
+    var employeeCustomers = serviceTickets.Where(st => st.Id == id).Select(st => customers.FirstOrDefault(c => c.Id == st.CustomerID))
+    .Where(c => c != null)  // filter out any null customers (where no matching customer was found)
+    .ToList();
+    return Results.Ok(employeeCustomers);
 });
 
 app.Run();
