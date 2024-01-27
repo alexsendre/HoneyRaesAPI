@@ -198,20 +198,20 @@ app.MapGet("/customers/{id}", (int id) =>
     return Results.Ok(customer);
 });
 
-app.MapPost("/servicetickets", (ServiceTickets serviceTicket) =>
+app.MapPost("/tickets", (ServiceTickets serviceTicket) =>
 {
     serviceTicket.Id = serviceTickets.Max(st => st.Id) + 1;
     serviceTickets.Add(serviceTicket);
     return serviceTicket;
 });
 
-app.MapDelete("/servicetickets/{id}", (int id) =>
+app.MapDelete("/tickets/{id}", (int id) =>
 {
     ServiceTickets serviceTicket = serviceTickets.FirstOrDefault(st => st.Id == id);
     serviceTickets.RemoveAt(serviceTicket.Id - 1);
 });
 
-app.MapPut("/servicetickets/{ticketId}", (int ticketId, ServiceTickets serviceTicket) =>
+app.MapPut("/tickets/{ticketId}", (int ticketId, ServiceTickets serviceTicket) =>
 {
     ServiceTickets ticketToUpdate = serviceTickets.FirstOrDefault(st => st.Id == ticketId);
     int ticketIndex = serviceTickets.IndexOf(ticketToUpdate);
@@ -228,18 +228,18 @@ app.MapPut("/servicetickets/{ticketId}", (int ticketId, ServiceTickets serviceTi
     return Results.Ok();
 });
 
-app.MapPost("/servicetickets/{id}/complete", (int id) => 
+app.MapPost("/tickets/{id}/complete", (int id) => 
 {
     ServiceTickets ticketToComplete = serviceTickets.FirstOrDefault(st => st.Id == id);
     ticketToComplete.DateCompleted = DateTime.Today;
 });
 
-app.MapGet("/servicetickets/emergency", () =>
+app.MapGet("/tickets/emergency", () =>
 {
     return serviceTickets.Where(st => st.isEmergency && st.DateCompleted == null).ToList();
 });
 
-app.MapGet("/servicetickets/unassigned", () =>
+app.MapGet("/tickets/unassigned", () =>
 {
     return serviceTickets.Where(st => st.EmployeeID == null).ToList();
 });
